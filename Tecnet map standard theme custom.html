@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Marker with Labels</title>
+    <link rel="icon" href="https://i.imghippo.com/files/dNl5325OtM.png" type="image/png">
+    <style>
+        #map {
+            height: 620px;
+            width: 100%;
+        }
+
+        .my-custom-class-for-label {
+            color: #313131;
+            font-weight: normal;
+            font-size: 11px;
+            margin-left: -20px !important;
+            text-shadow: 1px 1px 0px white, -1px -1px 0px white, -1px 1px 0px white, 1px -1px 0px white;
+        }
+
+        .my-custom-class-for-label-province{
+            color: #000000;
+            font-weight: medium;
+            font-size: 13px;
+            margin-left: -22px !important;
+            text-shadow: 1px 1px 0px white, -1px -1px 0px white, -1px 1px 0px white, 1px -1px 0px white;
+        }
+
+        /* Styling for the info window content */
+        .info-window {
+            font-family: Arial, sans-serif;
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .gm-style-iw-chr {
+            /* display: none !important; */
+        }
+
+        .gmnoprint {
+            display: none !important;
+        }
+
+        .gm-style .gm-style-iw-c {
+            padding: 0px !important;
+        }
+
+        .gm-control-active {
+            /* display: none !important; */
+        }
+
+        .gm-style-iw>div:nth-child(2) {
+            overflow: hidden !important;
+        }
+
+        .info-window img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .info-window .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-window .content {
+            padding: 10px;
+        }
+
+        .info-window .content h3 {
+            font-size: 16px;
+            margin: 0 0 8px;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANp9JqTsmyBuAEDrcplxFLxvkLTPWBYtY&callback=initMap"
+        async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script
+        src="https://cdn.sobekrepository.org/includes/gmaps-markerwithlabel/1.9.1/gmaps-markerwithlabel-1.9.1.min.js"></script>
+
+    <script>
+        // Locations list
+        const locations = [
+            {
+                name: "Tecnet Canada Inc - Vancouver",
+                province: "Vancouver",
+                position: { lat: 49.19918, lng: -123.001702 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/IMG_2696-scaled-e1731070347931-1024x685.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Victoria",
+                province: "Victoria",
+                position: { lat: 48.452058, lng: -123.367954 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Fort St. John",
+                province: "Fort St. John",
+                position: { lat: 56.252423, lng: -120.846409 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Smithers",
+                province: "Smithers",
+                position: { lat: 54.781311, lng: -127.168204 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Prince George",
+                province: "Prince George",
+                position: { lat: 53.9170641, lng: -122.7496693 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Kamloops",
+                province: "Kamloops",
+                position: { lat: 50.674522, lng: -120.327217 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Campbell River",
+                province: "Campbell River",
+                position: { lat: 50.024429, lng: -125.247526 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Nelson",
+                province: "Nelson",
+                position: { lat: 49.492855, lng: -117.295021 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Fernie",
+                province: "Fernie",
+                position: { lat: 49.504044, lng: -115.062859 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            },
+            {
+                name: "Tecnet Canada Inc - Kelowna",
+                province: "Kelowna",
+                position: { lat: 49.887952, lng: -119.496011 },
+                imageUrl: "https://tecnet.ca/wp-content/uploads/2024/06/8-565x592.webp",
+                address: "3403 Seymour Place, Victoria BC V8X 1W4",
+                phone: "(250) 475-6066"
+            }
+        ];
+        // provinces
+        const provinces = [
+            { name: "Edmonton", lat: 53.5444, lng: -113.4909 },
+            { name: "Calgary", lat: 51.0447, lng: -114.0719 },
+        ]
+
+        // Cities list
+        const cities = [
+            { name: "Athabasca", lat: 54.7190, lng: -113.2830 },
+            { name: "Bella Coola", lat: 52.3333, lng: -126.7577 },
+            { name: "Bonneville", lat: 54.2483, lng: -110.6000 },
+            { name: "Brooks", lat: 50.6023, lng: -111.8866 },
+            { name: "Buffalo Narrows", lat: 55.7655, lng: -108.3667 },
+            { name: "Burns Lake", lat: 54.1815, lng: -125.7556 },
+            // { name: "Calgary", lat: 51.0447, lng: -114.0719 },
+            { name: "Canmore", lat: 51.0895, lng: -115.3581 },
+            // { name: "Chard", lat: 58.7200, lng: -112.2872 },
+            { name: "Chetwynd", lat: 55.7172, lng: -121.6354 },
+            { name: "Cold Lake", lat: 54.4622, lng: -110.2748 },
+            // { name: "Cranbrook", lat: 49.5092, lng: -115.7817 },
+            { name: "Dawson Creek", lat: 55.7650, lng: -120.2360 },
+            { name: "Drumheller", lat: 51.4682, lng: -112.7114 },
+            // { name: "Edmonton", lat: 53.5444, lng: -113.4909 },
+            { name: "Fairview", lat: 56.3207, lng: -118.3992 },
+            { name: "Fraser Lake", lat: 53.7813, lng: -123.3889 },
+            { name: "Glasgow", lat: 55.6000, lng: -128.3667 },
+            { name: "Golden", lat: 51.2984, lng: -116.9602 },
+            { name: "Grande Cache", lat: 53.8619, lng: -119.1328 },
+            { name: "Havre", lat: 48.5584, lng: -109.6780 },
+            { name: "Hinton", lat: 53.4001, lng: -117.5860 },
+            { name: "Hudson's Hope", lat: 56.0134, lng: -121.6724 },
+            { name: "Kalispell", lat: 48.1892, lng: -114.3145 },
+            { name: "Ketchikan", lat: 55.3422, lng: -131.6461 },
+            { name: "Kitimat", lat: 54.0581, lng: -128.6477 },
+            { name: "Kindersley", lat: 51.4689, lng: -109.1751 },
+            // { name: "La Crete", lat: 58.4960, lng: -116.1296 },
+            { name: "Lac la Biche", lat: 54.7693, lng: -111.9641 },
+            { name: "Lethbridge", lat: 49.6935, lng: -112.8411 },
+            { name: "Lloydminster", lat: 53.2784, lng: -110.0002 },
+            { name: "Masset", lat: 53.8669, lng: -132.1021 },
+            { name: "Medicine Hat", lat: 50.0374, lng: -110.6779 },
+            { name: "Meadow Lake", lat: 54.2302, lng: -108.4352 },
+            // { name: "Meziadin Junction", lat: 54.7036, lng: -128.4677 },
+            { name: "Metlakatla", lat: 55.1220, lng: -131.5740 },
+            { name: "North Battleford", lat: 52.7761, lng: -108.2400 },
+            { name: "Okotoks", lat: 50.7169, lng: -113.9710 },
+            { name: "Peace River", lat: 56.2372, lng: -116.8321 },
+            { name: "Prince Albert", lat: 53.2001, lng: -105.7510 },
+            { name: "Prince Rupert", lat: 54.3173, lng: -130.3314 },
+            { name: "Quesnel", lat: 53.0019, lng: -122.4877 },
+            { name: "Red Deer", lat: 52.2681, lng: -113.8112 },
+            { name: "Revelstoke", lat: 51.0031, lng: -118.1893 },
+            { name: "Rosthern", lat: 52.5395, lng: -106.4528 },
+            { name: "Saskatoon", lat: 52.1332, lng: -106.6700 },
+            // { name: "Sidney", lat: 48.6528, lng: -123.3970 },
+            { name: "Slave Lake", lat: 55.2855, lng: -114.7721 },
+            { name: "Spirit River", lat: 55.0582, lng: -118.4145 },
+            { name: "Stewart", lat: 55.9745, lng: -129.9803 },
+            { name: "Swift Current", lat: 50.2878, lng: -107.7921 },
+            { name: "Terrace", lat: 54.4680, lng: -128.5721 },
+            { name: "Tumbler Ridge", lat: 55.1167, lng: -120.2763 },
+            { name: "Valemount", lat: 53.0336, lng: -119.2680 },
+            { name: "Wabascca-Desmarais", lat: 58.8480, lng: -114.6790 },
+            { name: "Waskaisu Lake", lat: 56.4000, lng: -111.3800 },
+            { name: "Whitehorse", lat: 60.7212, lng: -135.0568 },
+            { name: "Wrangell", lat: 56.4767, lng: -132.3723 },
+            { name: "Pskagway", lat: 59.5370, lng: -135.3175 },
+            { name: "Haines", lat: 59.2341, lng: -135.4348 },
+            // { name: "Istavus", lat: 58.5123, lng: -134.9887 },
+            // { name: "Juneau", lat: 58.3019, lng: -134.4197 },
+            { name: "Hoonah", lat: 58.1185, lng: -135.4348 },
+            { name: "Chichagof Island", lat: 58.6127, lng: -136.4281 },
+            { name: "Admiralty Island", lat: 58.4100, lng: -134.8220 },
+            // { name: "Silka", lat: 58.4787, lng: -134.9927 },
+            { name: "Kake", lat: 56.9764, lng: -133.9447 },
+            // { name: "Kupreanof Island", lat: 56.7986, lng: -133.8773 },
+            { name: "Atlin", lat: 59.5333, lng: -133.6950 },
+            { name: "Cassiar", lat: 58.5932, lng: -130.2140 },
+            { name: "McDame", lat: 57.9741, lng: -130.1870 },
+            { name: "Dease Lake", lat: 58.4630, lng: -129.0170 },
+            { name: "Telegraph Creek", lat: 57.4531, lng: -130.1306 },
+            // { name: "Iskut", lat: 57.5191, lng: -130.2133 },
+            { name: "Muncho Lake", lat: 58.0692, lng: -126.0433 },
+            { name: "Fort Nelson", lat: 58.8013, lng: -122.6982 },
+            // { name: "Toad River", lat: 58.0053, lng: -126.3497 },
+            { name: "Fort Ware", lat: 58.3341, lng: -123.1759 },
+            { name: "Wonowon", lat: 57.3490, lng: -122.5570 },
+            { name: "Zama City", lat: 58.5923, lng: -116.0336 },
+            // { name: "Meander River", lat: 58.6395, lng: -116.6195 },
+            // { name: "High Level", lat: 58.5230, lng: -116.0117 },
+            // { name: "Fort Vermilion", lat: 58.3774, lng: -116.7065 },
+            { name: "La Crete", lat: 58.4287, lng: -116.0506 },
+            // { name: "Paddle", lat: 58.3740, lng: -115.8350 },
+            { name: "Prairie Metis Settlement", lat: 58.2295, lng: -115.7791 },
+            // { name: "Manning", lat: 58.7753, lng: -116.3063 },
+            { name: "Fort McKay", lat: 57.2057, lng: -111.4531 },
+            { name: "Fort McMurray", lat: 56.7262, lng: -111.3798 },
+            { name: "Fort Chipewyan", lat: 58.7175, lng: -111.1277 },
+            { name: "Fitzgerald", lat: 58.5234, lng: -111.6001 },
+            { name: "Camsell Portage", lat: 58.5421, lng: -113.0953 },
+            { name: "Uranium City", lat: 58.7392, lng: -108.4100 },
+            { name: "Fond-du-Lac", lat: 58.5472, lng: -104.4863 },
+            { name: "Swift River", lat: 58.0655, lng: -127.5706 },
+            // { name: "Smith River", lat: 58.2253, lng: -127.7287 },
+            // { name: "Coal River", lat: 58.4316, lng: -128.2803 },
+            // { name: "Liard River", lat: 58.3108, lng: -127.8881 },
+            { name: "Jackfish River", lat: 58.4004, lng: -127.0106 },
+            { name: "Steen River", lat: 58.2077, lng: -118.6743 }
+        ];
+
+        // British Columbia bounds
+        const bcBounds = {
+            north: 60.0000,
+            south: 48.0000,
+            east: -114.0000,
+            west: -130.0000 // Adjusted west bound to exclude more of the left side
+        };
+        // Wait for the DOM to load
+        window.onload = function () {
+            // British Columbia center
+            var bcCenter = new google.maps.LatLng(53.7267, -127.6476); // British Columbia's center
+
+            // Map options
+            var mapOptions = {
+                zoom: 6,
+                center: bcCenter,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles: [
+                    {
+                        "featureType": "administrative.locality",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "administrative.province",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "poi.park",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    }
+                ],
+                restriction: {
+                    latLngBounds: bcBounds,
+                    strictBounds: false
+                }
+            };
+
+            // Create map
+            var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+            // Loop through cities and place markers
+            cities.forEach(function (city) {
+                var markerLatLng = new google.maps.LatLng(city.lat, city.lng);
+
+                // Create marker with custom label
+                var marker = new MarkerWithLabel({
+                    map: map,
+                    // animation: google.maps.Animation.DROP,
+                    position: markerLatLng,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 2,
+                        fillColor: 'white',
+                        fillOpacity: 4,
+                        strokeColor: 'gray',
+                        strokeWeight: 1,
+                        // labelOrigin: new google.maps.Point(0, -4),
+                    },
+                    labelContent: city.name,
+                    labelAnchor: new google.maps.Point(-8, 16),
+                    labelClass: "my-custom-class-for-label",
+                    labelInBackground: true
+                });
+            });
+
+            provinces.forEach(function (province) {
+                var provinceMarkerLatLng = new google.maps.LatLng(province.lat, province.lng);
+
+                // Create marker with custom label
+                var marker = new MarkerWithLabel({
+                    map: map,
+                    // animation: google.maps.Animation.DROP,
+                    position: provinceMarkerLatLng,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 3,
+                        fillColor: 'white',
+                        fillOpacity: 4,
+                        strokeColor: 'gray',
+                        strokeWeight: 1,
+                        // labelOrigin: new google.maps.Point(0, -4),
+                    },
+                    labelContent: province.name,
+                    labelAnchor: new google.maps.Point(-8, 19),
+                    labelClass: "my-custom-class-for-label-province",
+                    labelInBackground: true
+                });
+            });
+
+            // Keep track of the currently open info window
+            let currentInfoWindow = null;
+
+
+            locations.forEach(location => {
+                const marker = new google.maps.Marker({
+                    position: location.position,
+                    map,
+                    title: location.name,
+                    icon: {
+                        url: "https://i.imghippo.com/files/dNl5325OtM.png",
+                        scaledSize: new google.maps.Size(25, 25), // Resize marker icon
+                        anchor: new google.maps.Point(12, 45),
+                        labelOrigin: new google.maps.Point(10, 30),// Position the label slightly below the marker
+                    },
+                    label: {
+                        text: location.province,
+                        color: "black",
+                        fontWeight: "bold",
+                        fontSize: "12px",
+                        marginLeft: "20px",
+                    },
+                });
+
+                const infoWindowContent = `
+                    <div class="info-window">
+                        <div style="position: relative;">
+                            <img src="${location.imageUrl}" alt="${location.name}" />
+                            <button class="close-btn" onclick="closeInfoWindow()">X</button>
+                        </div>
+                        <div class="content">
+                            <h3>${location.name}</h3>
+                            <p>${location.address}</p>
+                            <p><strong>Phone:</strong> ${location.phone}</p>
+                        </div>
+                    </div>
+                `;
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoWindowContent,
+                });
+
+                marker.addListener("click", () => {
+                    // Close any currently open info window
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                    }
+
+                    // Open the new info window
+                    infoWindow.open(map, marker);
+                    currentInfoWindow = infoWindow;
+
+                    // Define a global function to close the info window
+                    window.closeInfoWindow = () => {
+                        infoWindow.close();
+                        currentInfoWindow = null;
+                    };
+                });
+            });
+
+            // Cluster the markers
+            new MarkerClusterer(map, locations.map(location => new google.maps.Marker({
+                position: location.position,
+            })), {
+                imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+            });
+
+        };
+    </script>
+</body>
+
+</html>
